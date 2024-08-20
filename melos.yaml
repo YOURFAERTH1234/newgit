@@ -1,0 +1,10 @@
+name: fl-query
+
+packages:
+  - packages/**
+
+ignore:
+  - package/example/
+
+ide:
+  intellij: false

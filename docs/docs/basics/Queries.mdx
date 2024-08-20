@@ -1,0 +1,193 @@
+---
+title: Queries
+sidebar_position: 3
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+## Create a Query
+
+Most of the time you'll be using `QueryBuilder`/`useQuery` to create & manipulate Queries.
+
+`QueryBuilder` just like any other `Builder` widget in Flutter. It has 2 required (unnamed) parameters `queryKey` and `queryFn` and 1 required named
+parameter `builder`
+
+On the other hand, `useQuery` accepts arguments just as same as `QueryBuilder` but it returns a `Query` instead of a `Widget` and doesn't have the `builder` argument
+
+<Tabs>
+  <TabItem value="vanilla" label="Vanilla">
+
+```dart
+class Example extends StatelessWidget {
+  const Example({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return QueryBuilder<String, HttpException>(
+      "todos",
+      () => api.getTodos(),
+      builder: (context, query) {
+        if (query.isLoading) {
+          return const CircularProgressIndicator();
+        }
+        return Text(query.data!);
+      },
+    );
+  }
+}
+```
+
+  </TabItem>
+  <TabItem value="hooks" label="Flutter Hooks">
+
+```dart
+class Example extends HookWidget {
+  const Example({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final query = useQuery<String, HttpException>(
+      "todos",
+      () => api.getTodos(),
+    );
+
+    if (query.isLoading) {
+      return const CircularProgressIndicator();
+    }
+    return Text(query.data!);
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+Both `QueryBuilder` and `useQuery` accepts error and success callbacks as well as configurations such as retry, `statleDuration`, `cacheDuration` etc.
+
+### API
+
+| Argument name        | Type                     | Description                                                                                                |
+| -------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| queryKey\* (unnamed) | String                   | The unique identifier of the query                                                                         |
+| queryFn\* (unnamed)  | VoidCallback             | Async Function that is used for getting resources                                                          |
+| initialData          | <DataType\>              | Initial data before query is fetched                                                                       |
+| onData               | ValueChanged<DataType\>  | Callback that supplies data when query is successfully fetched/refreshed                                   |
+| onError              | ValueChanged<ErrorType\> | Callback fired when query encounters an error while fetching                                               |
+| jsonConfig           | JsonConfig<DataType\>    | Supply `fromJson` and `toJson` for your returned data in onData<br/>If it's null, query won't be persisted |
+| enabled              | bool                     | Defines if query should be fetched immediately on mount or not                                             |
+| retryConfig          | RetryConfig              | Configure retry behvaiour                                                                                  |
+| refreshConfig        | RefreshConfig            | Configure refresh behvaiour                                                                                |
+
+## Query
+
+The `Query` is passed to the `builder` callback or returned by `useQuery`
+
+The `query` parameter aka `Query` contains all the useful getters, properties & methods for rendering data from the query. It contains the state of the current query, the data, the error, the loading status etc along with useful methods such as `refresh` and `setData`
+
+### Statuses
+
+The `query` contains the status of the current query. It has 2 types of status: 1. Query Progression status 2. Data availability status
+
+You can access them as follows:
+
+- Progressive status of Query
+  - `isInitial`: When the passed `initialData` is being used and the query hasn't been fetched yet
+  - `isLoading`: When the task function is running
+  - `isRefreshing`: When new data is being fetched or simply the `refresh` method is executing
+  - `isInactive`: When a query isn't used by any Widget (query isn't mounted)
+- Data availability status of Query
+  - `hasData`: When query contains data
+  - `hasError`: When the query contains error
+
+Now the most important part of query: Data and Error. You can access the data returned from the task using `query.data` or the error `query.error`. Both can be null. So always check if the data/error is null before accessing it
+
+:::info
+Don't use only `query.isLoading` to check if the data is available or not as the query can be failed & at this time `data` which can cause UI Exceptions. So use `query.hasData` always to check if `data` is available yet or not or use both together
+:::
+
+### Refresh
+
+Another important part is `Query.refresh`. You can use it to manually trigger refresh or force the query to get the latest data
+
+```dart
+await query.refresh();
+```
+
+### Set data Manually
+
+Finally, you can use `setData` to manually set the data of the query. This is useful when you want to refresh the query but the newest data is already available in the application. It can be used to reduce network traffic by saving network calls to the server. Or you can use it with `Mutations` to optimistically set data before the Mutation is executed & then update the query with actual data
+
+```dart
+await query.setData("new data"); // type of 'data' has to match the DataType
+```
+
+:::tip
+You can learn more about Optimistic Updates in the [Mutation Tutorial](/docs/basics/mutations)
+:::
+
+### Dynamic key
+
+You can also use dynamic keys with `QueryBuilder` and `useQuery`. With dart's String interpolation, you can pass dynamic keys to the query
+
+<Tabs>
+  <TabItem value="vanilla" label="Vanilla">
+
+```dart
+QueryBuilder<String, HttpException>(
+  "todos/$todoId",
+  () => api.getTodo(todoId),
+  builder: (context, query) {
+    /* ... */
+  },
+);
+```
+
+  </TabItem>
+  <TabItem value="flutter_hooks" label="Flutter Hooks">
+
+```dart
+useQuery<String, HttpException>(
+  "todos/$todoId",
+  () => api.getTodo(todoId),
+);
+```
+
+  </TabItem>
+</Tabs>
+
+> For every new `todoId`, a new query will be created and cached separately
+
+### Lazy Query
+
+By default queries are executed immediately after they are mounted. But you can also make them lazy by passing `enabled: false` to the `QueryBuilder` or `useQuery`
+
+<Tabs>
+  <TabItem value="vanilla" label="Vanilla">
+
+```dart
+QueryBuilder<String, HttpException>(
+  "lazy-todos",
+  () => api.getTodos(),
+  enabled: false,
+  builder: (context, query) {
+    /* ... */
+  },
+);
+```
+
+  </TabItem>
+  <TabItem value="flutter_hooks" label="Flutter Hooks">
+
+```dart
+useQuery<String, HttpException>(
+  "lazy-todos",
+  () => api.getTodos(),
+  enabled: false,
+);
+```
+
+  </TabItem>
+</Tabs>
+
+Now these queries won't be executed as soon as they're mounted. Until `Query.refresh()` or `Query.fetch()` is called these will stay in initial state. If `initial` data was passed, it'll be used until the query is refreshed. Same goes for persisting queries

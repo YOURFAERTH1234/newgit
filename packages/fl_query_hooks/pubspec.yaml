@@ -1,0 +1,24 @@
+name: fl_query_hooks
+description: Elite flutter_hooks compatible library for fl_query, the
+  Asynchronous data caching, refetching & invalidation library for Flutter
+version: 1.1.0
+
+homepage: https://fl-query.krtirtho.dev
+issue_tracker: https://github.com/KRTirtho/fl-query/issues
+repository: https://github.com/KRTirtho/fl-query/tree/main/packages/fl_query_hooks
+
+
+environment:
+  sdk: ">=2.17.1 <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  fl_query: ^1.1.0
+  flutter_hooks: ^0.20.0
+
+dev_dependencies:
+  flutter_lints: ^2.0.0
+  flutter_test:
+    sdk: flutter

@@ -1,0 +1,48 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "fl_query",
+      "cwd": "packages/fl_query/example",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "fl_query (profile mode)",
+      "cwd": "packages/fl_query/example",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "fl_query (release mode)",
+      "cwd": "packages/fl_query/example",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    },
+    {
+      "name": "hooks fl_query",
+      "cwd": "packages/fl_query_hooks/example",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "hooks fl_query (profile mode)",
+      "cwd": "packages/fl_query_hooks/example",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "hooks fl_query (release mode)",
+      "cwd": "packages/fl_query_hooks/example",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    }
+  ]
+}
